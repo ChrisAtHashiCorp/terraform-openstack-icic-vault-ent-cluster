@@ -1,0 +1,52 @@
+#cloud-config
+ssh_pwauth: true
+disable_root: false
+password: HashiPass123!
+chpasswd:
+  expire: false
+
+yum_repos:
+  hashicorp:
+    name: HashiCorp Stable - $basearch
+    baseurl: https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
+    enabled: true
+    gpgcheck: true
+    gpgkey: https://rpm.releases.hashicorp.com/gpg
+
+packages:
+  - vault-enterprise
+
+write_files:
+  - path: /opt/vault/vault.hclic
+    owner: "vault:vault"
+    permissions: "0400"
+    defer: true
+    content: "${vault_license}"
+
+  - path: /opt/vault/tls/ca.crt
+    owner: "vault:vault"
+    permissions: "0600"
+    defer: true
+    content: |
+      ${indent(6, ca_cert)}
+
+  - path: /opt/vault/tls/tls.crt
+    owner: "vault:vault"
+    permissions: "0600"
+    defer: true
+    content: |
+      ${indent(6, vault_cert)}
+
+  - path: /opt/vault/tls/tls.key
+    owner: "vault:vault"
+    permissions: "0600"
+    defer: true
+    content: |
+      ${indent(6, vault_certkey)}
+  
+  - path: /etc/vault.d/vault.hcl
+    owner: "vault:vault"
+    permissions: "0600"
+    defer: true
+    content: |
+      ${indent(6, vault_config)}
