@@ -46,7 +46,7 @@ data "openstack_images_image_v2" "image" {
 
 locals {
   vault-config = {
-    for fqdn in local.fqdns : fqdn => templatefile("./provision/vault.hcl.tftpl",
+    for fqdn in local.fqdns : fqdn => templatefile("${path.module}/provision/vault.hcl.tftpl",
       {
         fqdn      = fqdn
         srvr_list = setsubtract(toset(local.fqdns), toset([fqdn]))
@@ -55,7 +55,7 @@ locals {
   }
 
   user-data = {
-    for fqdn in local.fqdns : fqdn => templatefile("./provision/cloud-init.yml.tftpl",
+    for fqdn in local.fqdns : fqdn => templatefile("${path.module}/provision/cloud-init.yml.tftpl",
       {
         vault_license = var.vault_license
         ca_cert       = acme_certificate.certificate.issuer_pem
