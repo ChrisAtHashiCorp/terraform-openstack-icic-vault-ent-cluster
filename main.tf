@@ -96,7 +96,7 @@ resource "ssh_resource" "vault-init" {
   bastion_user     = var.ssh_bastion.user
   bastion_password = var.ssh_bastion.password
 
-  host     = openstack_compute_instance_v2.vault-nodes[local.fqdns[0]].network.fixed_ip_v4
+  host     = openstack_compute_instance_v2.vault-nodes[local.fqdns[0]].access_ip_v4
   user     = var.ssh_conn.user
   password = var.ssh_conn.password
 
