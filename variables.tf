@@ -41,6 +41,7 @@ variable "vault_license" {
 }
 
 variable "ssh_bastion" {
+  sensitive = true
   type = object({
     host     = optional(string, null)
     port     = optional(string, "22")
@@ -51,6 +52,7 @@ variable "ssh_bastion" {
 }
 
 variable "ssh_conn" {
+  sensitive = true
   type = object({
     user     = optional(string, "rocky")
     password = optional(string, null)
