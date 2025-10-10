@@ -101,10 +101,33 @@ resource "ssh_resource" "vault-init" {
   password = var.ssh_conn.password
 
   commands = [
-    "uname -a"
+    "vault operator init -tls-skip-verify"
   ]
 
   lifecycle {
     ignore_changes = all
   }
+}
+
+locals {
+  vault_init_res = split("\n", chomp(ssh_resource.vault-init.result))
+  vault_unseal_keys = compact([for s in local.vault_init_res : startswith(s, "Unseal Key 1: ") ? s : ""])
+}
+
+# Unseal Vault Cluster nodes
+
+resource "ssh_resource" "vault-unseal" {
+  for_each = toset(local.fqdns)
+
+  bastion_host     = var.ssh_bastion.host
+  bastion_user     = var.ssh_bastion.user
+  bastion_password = var.ssh_bastion.password
+
+  host     = openstack_compute_instance_v2.vault-nodes[each.key].access_ip_v4
+  user     = var.ssh_conn.user
+  password = var.ssh_conn.password
+
+  commands = [
+    "uname -a; date"
+  ]
 }
