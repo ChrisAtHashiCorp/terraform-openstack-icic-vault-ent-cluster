@@ -50,3 +50,7 @@ write_files:
     defer: true
     content: |
       ${indent(6, vault_config)}
+
+runcmd:
+  - systemctl daemon-reload
+  - systemctl enable --now vault.service
