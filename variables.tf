@@ -47,6 +47,7 @@ variable "ssh_bastion" {
     user     = optional(string, null)
     password = optional(string, null)
   })
+  default = {}
 }
 
 variable "ssh_conn" {
@@ -54,4 +55,5 @@ variable "ssh_conn" {
     user     = optional(string, "rocky")
     password = optional(string, null)
   })
+  default = {}
 }
