@@ -88,3 +88,23 @@ resource "openstack_compute_instance_v2" "vault-nodes" {
     ignore_changes = [user_data]
   }
 }
+
+# Initiate Vault Cluster
+
+resource "ssh_resource" "vault-init" {
+  bastion_host     = var.ssh_bastion.host
+  bastion_user     = var.ssh_bastion.user
+  bastion_password = var.ssh_bastion.password
+
+  host     = openstack_compute_instance_v2.vault-nodes[local.fqdns[0]].network.fixed_ip_v4
+  user     = var.ssh_conn.user
+  password = var.ssh_conn.password
+
+  commands = [
+    "uname -a"
+  ]
+
+  lifecycle {
+    ignore_changes = all
+  }
+}

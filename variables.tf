@@ -39,3 +39,19 @@ variable "network" {
 variable "vault_license" {
   type = string
 }
+
+variable "ssh_bastion" {
+  type = object({
+    host     = optional(string, null)
+    port     = optional(string, "22")
+    user     = optional(string, null)
+    password = optional(string, null)
+  })
+}
+
+variable "ssh_conn" {
+  type = object({
+    user     = optional(string, "rocky")
+    password = optional(string, null)
+  })
+}
