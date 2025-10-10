@@ -112,7 +112,7 @@ resource "ssh_resource" "vault-init" {
 locals {
   vault_init_res = split("\n", chomp(ssh_resource.vault-init.result))
   vault_unseal_keys = compact([for s in local.vault_init_res : startswith(s, "Unseal Key 1: ") ? trimprefix(s, "Unseal Key 1: ") : ""])
-  vault_root_token = compact([for s in local.vault_init_res : startswith(s, "Initial Root Token: ") ? trimprefix(s, "Initial Root Token: " : ""])
+  vault_root_token = compact([for s in local.vault_init_res : startswith(s, "Initial Root Token: ") ? trimprefix(s, "Initial Root Token: ") : ""])
 }
 
 # Unseal Vault Cluster nodes
