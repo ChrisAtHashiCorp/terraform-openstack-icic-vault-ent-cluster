@@ -127,8 +127,8 @@ resource "ssh_resource" "vault-unseal" {
   password = var.ssh_conn.password
 
   commands = [
-    "vault operator unseal ${local.vault_init_res.unseal_keys_b64[0]}",
-    "vault operator unseal ${local.vault_init_res.unseal_keys_b64[1]}",
-    "vault operator unseal ${local.vault_init_res.unseal_keys_b64[2]}"
+    "vault operator unseal -tls-skip-verify ${local.vault_init_res.unseal_keys_b64[0]}",
+    "vault operator unseal -tls-skip-verify ${local.vault_init_res.unseal_keys_b64[1]}",
+    "vault operator unseal -tls-skip-verify ${local.vault_init_res.unseal_keys_b64[2]}",
   ]
 }
