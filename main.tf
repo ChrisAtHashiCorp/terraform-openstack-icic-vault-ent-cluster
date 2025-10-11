@@ -110,7 +110,8 @@ resource "ssh_resource" "vault-init" {
 }
 
 locals {
-  vault_init_res = jsondecode(ssh_resource.vault-init.result)
+  #  vault_init_res = jsondecode(ssh_resource.vault-init.result)
+  vault_init_res = true
 }
 
 # Unseal Vault Cluster nodes
