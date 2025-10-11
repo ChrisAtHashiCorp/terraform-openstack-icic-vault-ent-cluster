@@ -101,7 +101,7 @@ resource "ssh_resource" "vault-init" {
   password = var.ssh_conn.password
 
   commands = [
-    "vault operator init -tls-skip-verify"
+    "vault operator init -tls-skip-verify -format=json"
   ]
 
   lifecycle {
@@ -110,9 +110,7 @@ resource "ssh_resource" "vault-init" {
 }
 
 locals {
-  vault_init_res = split("\n", chomp(ssh_resource.vault-init.result))
-  vault_unseal_keys = compact([for s in local.vault_init_res : startswith(s, "Unseal Key 1: ") ? trimprefix(s, "Unseal Key 1: ") : ""])
-  vault_root_token = compact([for s in local.vault_init_res : startswith(s, "Initial Root Token: ") ? trimprefix(s, "Initial Root Token: ") : ""])
+  vault_init_res = jsondecode(ssh_resource.vault-init.result)
 }
 
 # Unseal Vault Cluster nodes
@@ -129,8 +127,6 @@ resource "ssh_resource" "vault-unseal" {
   password = var.ssh_conn.password
 
   commands = [
-    "vault operator unseal ${local.vault_unseal_keys[0]}",
-    "vault operator unseal ${local.vault_unseal_keys[1]}",
-    "vault operator unseal ${local.vault_unseal_keys[2]}"
+    "uname -a"
   ]
 }
