@@ -126,7 +126,7 @@ resource "ssh_resource" "vault-unseal" {
   user     = var.ssh_conn.user
   password = var.ssh_conn.password
 
-  timeout = 30s
+  timeout = "30s"
 
   commands = [
     "vault operator unseal -tls-skip-verify ${local.vault_init_res.unseal_keys_b64[0]}",
