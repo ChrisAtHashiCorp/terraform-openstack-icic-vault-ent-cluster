@@ -14,7 +14,7 @@ resource "aws_route53_record" "fqdns" {
   zone_id = data.aws_route53_zone.domain.zone_id
   name    = each.value
   type    = "A"
-  ttl     = 300
+  ttl     = 30
   records = [openstack_compute_instance_v2.vault-nodes[each.key].access_ip_v4]
 }
 
