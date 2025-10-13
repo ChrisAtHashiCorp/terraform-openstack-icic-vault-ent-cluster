@@ -5,17 +5,6 @@ password: HashiPass123!
 chpasswd:
   expire: false
 
-yum_repos:
-  hashicorp:
-    name: HashiCorp Stable - $basearch
-    baseurl: https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
-    enabled: true
-    gpgcheck: true
-    gpgkey: https://rpm.releases.hashicorp.com/gpg
-
-packages:
-  - vault-enterprise
-
 write_files:
   - path: /opt/vault/vault.hclic
     owner: "vault:vault"

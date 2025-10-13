@@ -19,7 +19,7 @@ variable "email" {
 
 variable "image_name" {
   type    = string
-  default = "rockylinux-9.6"
+  default = "hashistack"
 }
 
 variable "sshkey" {
