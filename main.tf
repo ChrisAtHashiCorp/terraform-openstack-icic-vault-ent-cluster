@@ -111,8 +111,30 @@ resource "ssh_resource" "vault-init" {
 
 locals {
   vault_init_res = jsondecode(ssh_resource.vault-init.result)
+  hosts_file = [for i in local.fqdns : "${openstack_compute_instance_v2.vault-nodes[i].access_ip_v4} ${i}" ]
 }
 
+# Add static entries for DNS on nodes
+
+resource "ssh_resource" "vault-hosts" {
+  for_each = toset(local.fqdns)
+
+  bastion_host     = var.ssh_bastion.host
+  bastion_user     = var.ssh_bastion.user
+  bastion_password = var.ssh_bastion.password
+
+  host     = openstack_compute_instance_v2.vault-nodes[each.key].access_ip_v4
+  user     = var.ssh_conn.user
+  password = var.ssh_conn.password
+
+  timeout = "30s"
+
+  commands = [
+    "echo ${local.hosts_file[0]} >> /etc/hosts",
+    "echo ${local.hosts_file[1]} >> /etc/hosts",
+    "echo ${local.hosts_file[2]} >> /etc/hosts"
+  ]
+}
 # Unseal Vault Cluster nodes
 
 resource "ssh_resource" "vault-unseal" {
@@ -133,4 +155,6 @@ resource "ssh_resource" "vault-unseal" {
     "vault operator unseal -tls-skip-verify ${local.vault_init_res.unseal_keys_b64[1]}",
     "vault operator unseal -tls-skip-verify ${local.vault_init_res.unseal_keys_b64[2]}",
   ]
+
+  depends_on = [ssh_resource.vault-hosts]
 }
