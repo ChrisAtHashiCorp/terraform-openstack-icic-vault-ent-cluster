@@ -135,6 +135,7 @@ resource "ssh_resource" "vault-hosts" {
     "echo \"${local.hosts_file[2]}\" | sudo tee -a /etc/hosts",
   ]
 }
+
 # Unseal Vault Cluster nodes
 
 resource "ssh_resource" "vault-unseal" {
