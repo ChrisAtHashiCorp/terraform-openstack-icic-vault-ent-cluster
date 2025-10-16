@@ -130,9 +130,9 @@ resource "ssh_resource" "vault-hosts" {
   timeout = "30s"
 
   commands = [
-    "echo ${local.hosts_file[0]} >> /etc/hosts",
-    "echo ${local.hosts_file[1]} >> /etc/hosts",
-    "echo ${local.hosts_file[2]} >> /etc/hosts"
+    "sudo echo \"${local.hosts_file[0]}\" >> /etc/hosts",
+    "sudo echo \"${local.hosts_file[1]}\" >> /etc/hosts",
+    "sudo echo \"${local.hosts_file[2]}\" >> /etc/hosts"
   ]
 }
 # Unseal Vault Cluster nodes
