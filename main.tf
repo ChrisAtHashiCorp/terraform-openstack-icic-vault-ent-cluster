@@ -20,32 +20,58 @@ resource "aws_route53_record" "fqdns" {
 
 # Create TLS certificates for the servers 
 
+# Generate a private key for the CA
+resource "tls_private_key" "dev_ca_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+# Create a self-signed CA certificate
+resource "tls_self_signed_cert" "dev_ca_cert" {
+  private_key_pem = tls_private_key.dev_ca_key.private_key_pem
+
+  subject {
+    common_name  = "Development CA"
+    organization = "Dev Team"
+  }
+
+  is_ca_certificate = true
+  validity_period_hours = 8760 # 1 year validity
+
+  allowed_uses = [
+    "cert_signing",
+    "crl_signing",
+    "server_auth",
+    "client_auth",
+  ]
+}
+
+# Vault server nodes certificate
 resource "tls_private_key" "cert-key" {
   algorithm = "ECDSA"
 }
 
-resource "tls_self_signed_cert" "vault-server" {
+resource "tls_cert_request" "vault-server" {
   private_key_pem = tls_private_key.cert-key.private_key_pem
 
-  # Certificate expires after 12 hours.
+  dns_names = local.fqdns
+  subject {
+    organization = "HashiCorp"
+  }
+}
+
+resource "tls_locally_signed_cert" "vault-server" {
+  cert_request_pem   = tls_cert_request.vault-server.cert_request_pem
+  ca_private_key_pem = tls_private_key.dev_ca_key.private_key_pem
+  ca_cert_pem        = tls_self_signed_cert.dev_ca_cert.cert_pem
+
   validity_period_hours = 12
 
-  # Generate a new certificate if Terraform is run within three
-  # hours of the certificate's expiration time.
-  early_renewal_hours = 3
-
-  # Reasonable set of uses for a server SSL certificate.
   allowed_uses = [
     "key_encipherment",
     "digital_signature",
     "server_auth",
   ]
-
-  dns_names = local.fqdns
-
-  subject {
-    organization = "HashiCorp, And IBM Company"
-  }
 }
 
 # Create Vault server nodes
@@ -69,8 +95,8 @@ locals {
     for fqdn in local.fqdns : fqdn => templatefile("${path.module}/provision/cloud-init.yml.tftpl",
       {
         vault_license = var.vault_license
-        ca_cert       = tls_self_signed_cert.vault-server.cert_pem
-        vault_cert    = tls_self_signed_cert.vault-server.cert_pem
+        ca_cert       = tls_self_signed_cert.dev_ca_cert.cert_pem
+        vault_cert    = tls_locally_signed_cert.vault-server.cert_pem
         vault_certkey = tls_private_key.cert-key.private_key_pem
         vault_config  = local.vault-config[fqdn]
       }
