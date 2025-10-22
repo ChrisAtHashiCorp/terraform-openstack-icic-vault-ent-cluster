@@ -20,20 +20,31 @@ resource "aws_route53_record" "fqdns" {
 
 # Create TLS certificates for the servers 
 
-resource "acme_registration" "reg" {
-  email_address = var.email
+resource "tls_private_key" "cert-key" {
+  algorithm = "ECDSA"
 }
 
-resource "acme_certificate" "certificate" {
-  account_key_pem           = acme_registration.reg.account_key_pem
-  subject_alternative_names = local.fqdns
+resource "tls_self_signed_cert" "vault-server" {
+  private_key_pem = tls_private_key.cert-key.private_key_pem
 
-  dns_challenge {
-    provider = "route53"
+  # Certificate expires after 12 hours.
+  validity_period_hours = 12
 
-    config = {
-      AWS_DEFAULT_REGION = "us-east-1"
-    }
+  # Generate a new certificate if Terraform is run within three
+  # hours of the certificate's expiration time.
+  early_renewal_hours = 3
+
+  # Reasonable set of uses for a server SSL certificate.
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+
+  dns_names = local.fqdns
+
+  subject {
+    organization = "HashiCorp, And IBM Company"
   }
 }
 
@@ -58,9 +69,9 @@ locals {
     for fqdn in local.fqdns : fqdn => templatefile("${path.module}/provision/cloud-init.yml.tftpl",
       {
         vault_license = var.vault_license
-        ca_cert       = acme_certificate.certificate.issuer_pem
-        vault_cert    = acme_certificate.certificate.certificate_pem
-        vault_certkey = acme_certificate.certificate.private_key_pem
+        ca_cert       = tls_self_signed_cert.vault-server.cert_pem
+        vault_cert    = tls_self_signed_cert.vault-server.cert_pem
+        vault_certkey = tls_private_key.cert-key
         vault_config  = local.vault-config[fqdn]
       }
     )
