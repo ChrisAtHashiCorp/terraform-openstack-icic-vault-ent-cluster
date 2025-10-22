@@ -48,7 +48,8 @@ resource "tls_self_signed_cert" "dev_ca_cert" {
 
 # Vault server nodes certificate
 resource "tls_private_key" "cert-key" {
-  algorithm = "ECDSA"
+  algorithm = "RSA"
+  rsa_bits = 2048
 }
 
 resource "tls_cert_request" "vault-server" {
