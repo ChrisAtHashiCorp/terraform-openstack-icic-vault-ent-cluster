@@ -71,7 +71,7 @@ locals {
         vault_license = var.vault_license
         ca_cert       = tls_self_signed_cert.vault-server.cert_pem
         vault_cert    = tls_self_signed_cert.vault-server.cert_pem
-        vault_certkey = tls_private_key.cert-key
+        vault_certkey = tls_private_key.cert-key.private_key_pem
         vault_config  = local.vault-config[fqdn]
       }
     )
