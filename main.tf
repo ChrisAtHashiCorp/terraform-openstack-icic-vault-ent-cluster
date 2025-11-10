@@ -159,6 +159,7 @@ resource "ssh_resource" "vault-init" {
 locals {
   vault_init_res = jsondecode(ssh_resource.vault-init.result)
   hosts_file = [for i in local.fqdns : "${openstack_compute_instance_v2.vault-nodes[i].access_ip_v4} ${i}" ]
+  hosts_file_cmds = [for i in local.hosts_file : "echo \"${i}\" | sudo tee -a /etc/hosts" ]
 }
 
 # Add static entries for DNS on nodes
@@ -176,11 +177,7 @@ resource "ssh_resource" "vault-hosts" {
 
   timeout = "30s"
 
-  commands = [
-    "echo \"${local.hosts_file[0]}\" | sudo tee -a /etc/hosts",
-    "echo \"${local.hosts_file[1]}\" | sudo tee -a /etc/hosts",
-    "echo \"${local.hosts_file[2]}\" | sudo tee -a /etc/hosts",
-  ]
+  commands = local.hosts_file_cmds
 }
 
 # Unseal Vault Cluster nodes
