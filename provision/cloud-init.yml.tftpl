@@ -40,7 +40,15 @@ write_files:
     content: |
       ${indent(6, vault_config)}
 
+  - path: /usr/share/pki/ca-trust-source/anchors/vault_self-signed_ca.crt
+    owner: "vault:vault"
+    permissions: "0600"
+    defer: true
+    content: |
+      ${indent(6, ca_cert)}
+
 runcmd:
   - systemctl daemon-reload
   - systemctl enable --now vault.service
   - systemctl enable --now httpd.service
+  - update-ca-trust
