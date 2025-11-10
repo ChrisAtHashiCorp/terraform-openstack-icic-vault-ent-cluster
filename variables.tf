@@ -5,7 +5,7 @@ variable "domain" {
 
 variable "name_prefix" {
   type    = string
-  default = "vaultsrv-"
+  default = "vaultsrv"
 }
 
 variable "node_count" {
@@ -15,6 +15,7 @@ variable "node_count" {
 
 variable "email" {
   type = string
+  default = "noreply@hashicorp.com"
 }
 
 variable "image_name" {
@@ -22,7 +23,7 @@ variable "image_name" {
   default = "hashistack"
 }
 
-variable "sshkey" {
+variable "sshkey_prefix" {
   type    = string
   default = "vault-node-sshkey"
 }

@@ -1,5 +1,11 @@
+# Random ID for the cluster
+
+resource "random_id" "cluster_id" {
+  byte_length = 8
+}
+
 locals {
-  fqdns = [for i in range(var.node_count) : "${var.name_prefix}${i}.${var.domain}"]
+  fqdns = [for i in range(var.node_count) : "${var.name_prefix}-${i}.${var.domain}"]
 }
 
 # Create DNS records for instances
@@ -106,7 +112,7 @@ locals {
 }
 
 resource "openstack_compute_keypair_v2" "sshkey" {
-  name = var.sshkey
+  name = "${var.sshkey_prefix}-${random_id.cluster_id.hex}"
 }
 
 resource "openstack_compute_instance_v2" "vault-nodes" {
@@ -121,6 +127,8 @@ resource "openstack_compute_instance_v2" "vault-nodes" {
   network {
     name = var.network
   }
+
+  tags = [ "cluster_id=${random_id.cluster_id.hex}" ]
 
   lifecycle {
     ignore_changes = [user_data]
