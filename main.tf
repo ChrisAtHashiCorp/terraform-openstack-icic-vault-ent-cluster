@@ -62,6 +62,7 @@ resource "tls_cert_request" "vault-server" {
   private_key_pem = tls_private_key.cert-key.private_key_pem
 
   dns_names = local.fqdns
+  ip_addresses = [ "127.0.0.1" ]
   subject {
     organization = "HashiCorp"
   }
