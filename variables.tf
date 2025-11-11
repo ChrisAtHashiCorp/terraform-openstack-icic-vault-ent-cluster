@@ -13,11 +13,6 @@ variable "node_count" {
   default = 3
 }
 
-variable "email" {
-  type = string
-  default = "noreply@hashicorp.com"
-}
-
 variable "image_name" {
   type    = string
   default = "hashistack"
