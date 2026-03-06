@@ -145,10 +145,6 @@ resource "ssh_resource" "vault-init" {
   commands = [
     "vault operator init -tls-skip-verify -format=json"
   ]
-
-  lifecycle {
-    ignore_changes = all
-  }
 }
 
 locals {
