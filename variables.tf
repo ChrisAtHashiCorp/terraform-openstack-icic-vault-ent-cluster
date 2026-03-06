@@ -13,9 +13,8 @@ variable "node_count" {
   default = 3
 }
 
-variable "image_name" {
+variable "image_id" {
   type    = string
-  default = "hashistack"
 }
 
 variable "sshkey_prefix" {
