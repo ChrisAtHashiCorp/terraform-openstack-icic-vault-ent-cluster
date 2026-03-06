@@ -100,7 +100,6 @@ locals {
       {
         fqdn         = fqdn
         srvr_list    = setsubtract(toset(local.fqdns), toset([fqdn]))
-        cluster_fqdn = local.cluster_fqdn
       }
     )
   }
