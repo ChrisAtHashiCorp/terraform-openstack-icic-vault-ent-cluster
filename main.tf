@@ -26,10 +26,10 @@ resource "aws_route53_record" "fqdns" {
 
 resource "aws_route53_record" "cluster" {
   zone_id = data.aws_route53_zone.domain.zone_id
-  name    = "vaultclstr-${random_id.cluster_id}.${var.domain}"
+  name    = "vaultclstr-${random_id.cluster_id.hex}.${var.domain}"
   type    = "A"
   ttl     = 30
-  records = [openstack_compute_instance_v2.vault-nodes[*].access_ip_v4]
+  records = [for node in openstack_compute_instance_v2.vault-nodes : node.access_ip_v4]
 }
   
 
