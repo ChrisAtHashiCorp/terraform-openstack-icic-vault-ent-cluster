@@ -5,7 +5,8 @@ resource "random_id" "cluster_id" {
 }
 
 locals {
-  fqdns = [for i in range(var.node_count) : "${var.name_prefix}-${i}.${var.domain}"]
+  fqdns        = [for i in range(var.node_count) : "${var.name_prefix}-${i}.${var.domain}"]
+  cluster_fqdn = "vaultclstr-${random_id.cluster_id.hex}.${var.domain}"
 }
 
 # Create DNS records for instances
@@ -26,12 +27,12 @@ resource "aws_route53_record" "fqdns" {
 
 resource "aws_route53_record" "cluster" {
   zone_id = data.aws_route53_zone.domain.zone_id
-  name    = "vaultclstr-${random_id.cluster_id.hex}.${var.domain}"
+  name    = local.cluster_fqdn
   type    = "A"
   ttl     = 30
   records = [for node in openstack_compute_instance_v2.vault-nodes : node.access_ip_v4]
 }
-  
+
 
 # Create TLS certificates for the servers 
 
@@ -50,7 +51,7 @@ resource "tls_self_signed_cert" "dev_ca_cert" {
     organization = "Dev Team"
   }
 
-  is_ca_certificate = true
+  is_ca_certificate     = true
   validity_period_hours = 8760 # 1 year validity
 
   allowed_uses = [
@@ -64,14 +65,14 @@ resource "tls_self_signed_cert" "dev_ca_cert" {
 # Vault server nodes certificate
 resource "tls_private_key" "cert-key" {
   algorithm = "RSA"
-  rsa_bits = 2048
+  rsa_bits  = 2048
 }
 
 resource "tls_cert_request" "vault-server" {
   private_key_pem = tls_private_key.cert-key.private_key_pem
 
-  dns_names = local.fqdns
-  ip_addresses = [ "127.0.0.1" ]
+  dns_names    = local.fqdns
+  ip_addresses = ["127.0.0.1"]
   subject {
     organization = "HashiCorp"
   }
@@ -97,8 +98,9 @@ locals {
   vault-config = {
     for fqdn in local.fqdns : fqdn => templatefile("${path.module}/provision/vault.hcl.tftpl",
       {
-        fqdn      = fqdn
-        srvr_list = setsubtract(toset(local.fqdns), toset([fqdn]))
+        fqdn         = fqdn
+        srvr_list    = setsubtract(toset(local.fqdns), toset([fqdn]))
+        cluster_fqdn = local.cluster_fqdn
       }
     )
   }
@@ -133,7 +135,7 @@ resource "openstack_compute_instance_v2" "vault-nodes" {
     name = var.network
   }
 
-  tags = [ "cluster_id=${random_id.cluster_id.hex}" ]
+  tags = ["cluster_id=${random_id.cluster_id.hex}"]
 
   lifecycle {
     ignore_changes = [user_data]
@@ -157,9 +159,9 @@ resource "ssh_resource" "vault-init" {
 }
 
 locals {
-  vault_init_res = jsondecode(ssh_resource.vault-init.result)
-  hosts_file = [for i in local.fqdns : "${openstack_compute_instance_v2.vault-nodes[i].access_ip_v4} ${i}" ]
-  hosts_file_cmds = [for i in local.hosts_file : "echo \"${i}\" | sudo tee -a /etc/hosts" ]
+  vault_init_res  = jsondecode(ssh_resource.vault-init.result)
+  hosts_file      = [for i in local.fqdns : "${openstack_compute_instance_v2.vault-nodes[i].access_ip_v4} ${i}"]
+  hosts_file_cmds = [for i in local.hosts_file : "echo \"${i}\" | sudo tee -a /etc/hosts"]
 }
 
 # Add static entries for DNS on nodes

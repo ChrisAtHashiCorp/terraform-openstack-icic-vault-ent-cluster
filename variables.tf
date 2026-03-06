@@ -14,7 +14,7 @@ variable "node_count" {
 }
 
 variable "image_id" {
-  type    = string
+  type = string
 }
 
 variable "sshkey_prefix" {
