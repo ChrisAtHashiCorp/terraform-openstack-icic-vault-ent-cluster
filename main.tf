@@ -84,6 +84,11 @@ resource "tls_locally_signed_cert" "vault-server" {
 
 # Create Vault server nodes
 
+data "openstack_images_image_v2" "image" {
+  name        = var.image_name
+  most_recent = true
+}
+
 locals {
   vault-config = {
     for fqdn in local.fqdns : fqdn => templatefile("${path.module}/provision/vault.hcl.tftpl",
@@ -115,7 +120,7 @@ resource "openstack_compute_instance_v2" "vault-nodes" {
   for_each = toset(local.fqdns)
 
   name        = each.value
-  image_id    = var.image_id
+  image_id    = data.openstack_images_image_v2.image.id
   flavor_name = var.flavor
   key_pair    = openstack_compute_keypair_v2.sshkey.name
   user_data   = local.user-data[each.key]
