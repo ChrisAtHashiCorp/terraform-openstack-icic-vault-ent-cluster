@@ -83,7 +83,7 @@ resource "tls_locally_signed_cert" "vault-server" {
   ca_private_key_pem = tls_private_key.dev_ca_key.private_key_pem
   ca_cert_pem        = tls_self_signed_cert.dev_ca_cert.cert_pem
 
-  validity_period_hours = 12
+  validity_period_hours = 8760
 
   allowed_uses = [
     "key_encipherment",
